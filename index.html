@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14242d">
+  <title>Venda de Garagem — Catálogo</title>
+  <style>
+    :root { --ink:#172630; --ink2:#51616b; --cream:#f7f5f0; --white:#fff; --accent:#ea6535; --accent2:#a83e22; --line:#e8e5dc; --soft:#fff4ec; --shadow:0 12px 38px rgba(23,38,48,.075); }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink); background:var(--cream); -webkit-font-smoothing:antialiased; }
+    button,input,select { font:inherit; }
+    button { cursor:pointer; }
+    a { color:inherit; text-decoration:none; }
+    .wrap { width:min(1180px,calc(100% - 38px)); margin-inline:auto; }
+    header { position:sticky; top:0; z-index:20; background:rgba(255,255,255,.94); border-bottom:1px solid var(--line); backdrop-filter:blur(16px); }
+    .header { display:flex; align-items:center; justify-content:space-between; gap:14px; min-height:75px; }
+    .logo { display:flex; gap:11px; align-items:center; font-weight:900; line-height:1.05; letter-spacing:-.045em; font-size:19px; }
+    .logo-mark { width:42px; height:42px; border-radius:13px; background:var(--accent); color:white; display:grid; place-items:center; font-size:23px; transform:rotate(-5deg); }
+    .logo small { display:block; margin-top:4px; font-size:11px; letter-spacing:.13em; font-weight:800; color:var(--accent2); text-transform:uppercase; }
+    .nav-actions { display:flex; align-items:center; gap:9px; }
+    .nav-link { border:1px solid var(--line); background:white; padding:11px 15px; border-radius:100px; color:var(--ink); font-size:13px; font-weight:800; white-space:nowrap; }
+    .nav-link[aria-pressed="true"] { background:var(--ink); color:white; border-color:var(--ink); }
+    .nav-link.primary { background:var(--accent); border-color:var(--accent); color:white; }
+    .hero { overflow:hidden; padding:65px 0 61px; color:white; background:radial-gradient(circle at 86% 42%,#31505c 0,transparent 36%),radial-gradient(circle at 14% 92%,#415255 0,transparent 40%),#14242d; position:relative; }
+    .hero::after { content:"✦"; position:absolute; right:7%; top:10%; font-size:230px; color:#ffffff0b; transform:rotate(20deg); pointer-events:none; }
+    .hero-in { position:relative; z-index:1; display:grid; grid-template-columns:minmax(0,1.5fr) minmax(210px,.5fr); gap:35px; align-items:center; }
+    .eyebrow { color:#ffb18c; text-transform:uppercase; letter-spacing:.18em; font-weight:900; font-size:12px; }
+    h1 { margin:17px 0; max-width:730px; font-size:clamp(38px,5.4vw,70px); letter-spacing:-.07em; line-height:1.01; font-weight:900; }
+    h1 em { font-style:normal; color:#ff9b6a; }
+    .hero p { color:#d5dfe3; line-height:1.7; font-size:16px; max-width:570px; margin:0 0 25px; }
+    .hero-btn { display:inline-flex; padding:15px 23px; border-radius:12px; background:var(--accent); color:white; font-weight:900; gap:9px; align-items:center; }
+    .hero-tag { border:1px solid #ffffff35; background:#ffffff12; padding:27px 22px; border-radius:23px; transform:rotate(5deg); text-align:center; box-shadow:0 20px 70px #0003; }
+    .hero-tag .symbol { font-size:46px; display:block; }
+    .hero-tag strong { display:block; font-size:27px; letter-spacing:-.05em; margin-top:8px; }
+    .hero-tag span { display:block; color:#d2dbdd; font-size:12px; line-height:1.6; }
+    .benefits { background:#fff; border-bottom:1px solid var(--line); }
+    .benefits .wrap { display:flex; align-items:center; gap:25px; justify-content:center; min-height:61px; flex-wrap:wrap; padding:12px 0; }
+    .benefits span { font-size:12px; font-weight:800; color:#465861; }
+    .benefits b { color:var(--accent); margin-right:8px; }
+    main { padding-top:48px; padding-bottom:90px; }
+    .section-head { display:flex; align-items:end; justify-content:space-between; gap:18px; margin-bottom:21px; }
+    h2 { font-size:clamp(26px,3.3vw,39px); letter-spacing:-.055em; line-height:1.05; margin:0 0 9px; }
+    .muted { color:var(--ink2); font-size:14px; line-height:1.5; margin:0; }
+    .count { background:white; border:1px solid var(--line); border-radius:20px; font-weight:800; font-size:13px; padding:10px 14px; white-space:nowrap; }
+    .toolbar { display:flex; gap:11px; align-items:stretch; flex-wrap:wrap; margin-bottom:15px; }
+    .search { flex:1 1 280px; position:relative; }
+    .search-icon { position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#75838a; }
+    input[type="search"],select { width:100%; min-height:48px; background:white; border:1px solid #deded9; border-radius:12px; padding:0 15px; outline:none; color:var(--ink); }
+    input[type="search"] { padding-left:43px; }
+    input:focus,select:focus { border-color:var(--accent); box-shadow:0 0 0 3px #ea65351b; }
+    .order { width:210px; }
+    .filters { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .chip { border:1px solid #dddcd6; background:#fff; border-radius:100px; padding:9px 15px; font-size:13px; font-weight:800; color:#57656d; }
+    .chip[aria-pressed="true"] { color:white; background:var(--ink); border-color:var(--ink); }
+    .controls-footer { display:flex; gap:18px; align-items:center; justify-content:space-between; margin-bottom:23px; flex-wrap:wrap; }
+    .switch { display:flex; gap:8px; align-items:center; font-size:13px; color:var(--ink2); }
+    input[type="checkbox"] { accent-color:var(--accent); width:16px; height:16px; }
+    .small-link { font-size:13px; font-weight:800; border:0; padding:6px 0; background:transparent; color:var(--accent2); }
+    .grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:17px; }
+    .product { background:white; border:1px solid var(--line); border-radius:17px; overflow:hidden; box-shadow:var(--shadow); min-width:0; display:flex; flex-direction:column; }
+    .photo { position:relative; aspect-ratio:4/3; background:linear-gradient(135deg,#ece8df,#f8f4ea); overflow:hidden; }
+    .photo img { display:block; width:100%; height:100%; object-fit:cover; }
+    .placeholder { height:100%; display:grid; place-items:center; font-size:58px; color:#aaa; }
+    .tag { position:absolute; bottom:10px; left:10px; display:inline-block; background:var(--ink); color:white; border-radius:7px; padding:6px 8px; font-size:10px; font-weight:900; letter-spacing:.04em; text-transform:uppercase; }
+    .sold { position:absolute; inset:0; display:grid; place-items:center; background:#11212abe; color:white; text-transform:uppercase; font-weight:900; font-size:21px; letter-spacing:.08em; }
+    .fav { border:0; position:absolute; top:11px; right:11px; height:35px; width:35px; border-radius:50%; background:#fff; box-shadow:0 3px 15px #0002; font-size:20px; color:#87929a; display:grid; place-items:center; }
+    .fav.active { color:#d94e42; }
+    .details { padding:16px; display:flex; flex-direction:column; flex:1; }
+    .category { font-size:10px; letter-spacing:.13em; text-transform:uppercase; font-weight:900; color:var(--accent2); margin-bottom:7px; }
+    .name { font-size:15px; line-height:1.36; letter-spacing:-.02em; font-weight:800; margin:0 0 12px; min-height:41px; overflow-wrap:anywhere; }
+    .price { font-size:23px; letter-spacing:-.05em; font-weight:900; margin-top:auto; margin-bottom:14px; }
+    .price.unknown { font-size:15px; color:#75828a; letter-spacing:0; }
+    .buy { display:flex; justify-content:center; align-items:center; text-align:center; width:100%; min-height:43px; padding:11px 12px; border-radius:10px; border:0; background:var(--accent); color:#fff; font-weight:900; font-size:13px; }
+    .buy:hover,.hero-btn:hover,.nav-link.primary:hover { background:#cf542a; }
+    .buy:disabled { cursor:default; background:#e8e8e4; color:#74818a; }
+    .pages { display:flex; align-items:center; justify-content:center; gap:13px; padding-top:30px; }
+    .pages button { border:1px solid var(--line); background:white; padding:11px 16px; border-radius:10px; font-weight:800; }
+    .pages button:disabled { opacity:.42; cursor:default; }
+    .pages span { color:var(--ink2); font-size:13px; font-weight:700; }
+    .empty { text-align:center; border:1px dashed #d7d0c4; border-radius:18px; padding:60px 25px; background:white; margin-top:18px; }
+    .empty .symbol { font-size:42px; display:block; margin-bottom:10px; }
+    .empty h3 { font-size:21px; margin:0 0 8px; }
+    .empty p { color:var(--ink2); line-height:1.6; margin:0; }
+    .preview { margin:20px 0; padding:15px 18px; background:#fff1dd; border:1px solid #efd3a8; border-radius:14px; display:none; gap:13px; align-items:center; justify-content:space-between; flex-wrap:wrap; font-size:13px; line-height:1.6; }
+    .preview strong { color:#7e4b17; }
+    .preview .pick { border:0; border-radius:8px; background:#172630; color:#fff; padding:11px 14px; font-weight:800; }
+    footer { padding:33px 0; color:#cdd7dc; background:#172630; }
+    footer .wrap { display:flex; gap:20px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    footer strong { color:#fff; }
+    footer p { font-size:12px; line-height:1.6; margin:5px 0 0; }
+    .toast { position:fixed; bottom:20px; left:50%; transform:translate(-50%,140px); padding:14px 21px; border-radius:12px; background:#172630; color:#fff; z-index:50; max-width:min(440px,90vw); box-shadow:0 14px 45px #0003; transition:transform .3s ease; font-size:13px; font-weight:700; text-align:center; }
+    .toast.show { transform:translate(-50%,0); }
+    @media(max-width:950px) { .grid{grid-template-columns:repeat(3,minmax(0,1fr));} .hero{padding:53px 0;} }
+    @media(max-width:690px) { .wrap{width:min(100% - 28px,1180px);} .hero-in{grid-template-columns:1fr;} .hero-tag{display:none;} .hero{padding:46px 0;} h1{font-size:clamp(39px,10vw,58px);} .benefits .wrap{justify-content:space-between;gap:11px;} .benefits span{font-size:11px;} .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;} .details{padding:12px;} .price{font-size:20px;} .name{font-size:13px;min-height:36px;} .category{font-size:9px;} .order{flex:1 1 180px;} .header{min-height:67px;} .nav-link{padding:10px 11px;} .nav-actions .primary{display:none;} main{padding-top:32px;} }
+    @media(max-width:390px) { .logo{font-size:16px;} .logo-mark{width:35px;height:35px;font-size:20px;} .nav-link{font-size:12px;} .benefits .wrap{gap:7px;} .benefits span{font-size:10px;} .grid{gap:9px;} .photo{aspect-ratio:1/1;} .name{font-size:12px;} .price{font-size:18px;} .details{padding:10px;} .buy{font-size:12px;} }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap header">
+    <a href="#topo" class="logo" aria-label="Ir ao início"><span class="logo-mark">✦</span><span>ACHADOS &<br>OPORTUNIDADES<small>Venda de garagem</small></span></a>
+    <div class="nav-actions">
+      <button id="favoritesTop" class="nav-link" type="button" aria-pressed="false">♡ Favoritos <span id="favCount">0</span></button>
+      <a class="nav-link primary" href="#produtos">Ver ofertas ↓</a>
+    </div>
+  </div>
+</header>
+<section class="hero" id="topo">
+  <div class="wrap hero-in">
+    <div>
+      <div class="eyebrow">✦ Oportunidades que valem a pena</div>
+      <h1>Coisas incríveis.<br><em>Preços que surpreendem.</em></h1>
+      <p>Peças únicas, boas descobertas e ofertas para aproveitar. Encontrou algo de que gostou? Fale com a gente antes que acabe!</p>
+      <a class="hero-btn" href="#produtos">Explorar catálogo <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="hero-tag"><span class="symbol">🏷️</span><strong>Achados únicos!</strong><span>Confira as novidades<br>e garanta seus favoritos.</span></div>
+  </div>
+</section>
+<div class="benefits"><div class="wrap"><span><b>✓</b> Ofertas especiais</span><span><b>✓</b> Peças selecionadas</span><span><b>✓</b> Negociação direta</span></div></div>
+<main class="wrap" id="produtos">
+  <div id="previewBanner" class="preview">
+    <span><strong>Modo de demonstração.</strong> Para testar com suas próprias imagens, selecione a pasta do catálogo no computador. Para publicar com atualização automática, use o Google Apps Script e a pasta do Drive.</span>
+    <button class="pick" id="selectFolder" type="button">📁 Selecionar pasta de fotos</button>
+    <input type="file" id="folderInput" webkitdirectory directory multiple accept="image/jpeg,image/png,image/webp" hidden>
+  </div>
+  <div class="section-head"><div><h2>Encontre seu próximo achado</h2><p class="muted">Navegue pelas categorias e descubra os produtos disponíveis.</p></div><span class="count" id="totalCount">Carregando...</span></div>
+  <div class="toolbar">
+    <label class="search"><span class="search-icon">⌕</span><input type="search" id="searchInput" placeholder="Buscar: isca, cadeira, livros..." aria-label="Pesquisar produtos"></label>
+    <select id="sortInput" class="order" aria-label="Ordenar produtos"><option value="recentes">Mais recentes</option><option value="menor">Menor preço</option><option value="maior">Maior preço</option><option value="az">Nome: A–Z</option></select>
+  </div>
+  <div class="filters" id="categories" aria-label="Filtrar por categoria"></div>
+  <div class="controls-footer"><label class="switch"><input type="checkbox" id="soldInput"> Mostrar produtos vendidos</label><button type="button" class="small-link" id="clearFilters">Limpar filtros</button></div>
+  <div id="loading" class="empty"><span class="symbol">🏷️</span><h3>Preparando as ofertas...</h3><p>Carregando os produtos do catálogo.</p></div>
+  <div class="grid" id="productGrid" aria-live="polite"></div>
+  <div id="emptyState" class="empty" style="display:none"><span class="symbol">🔎</span><h3>Nenhum produto encontrado</h3><p>Experimente outra palavra ou categoria.</p></div>
+  <div class="pages" id="pages" style="display:none"><button id="prevPage" type="button">← Anterior</button><span id="pagesText"></span><button id="nextPage" type="button">Próxima →</button></div>
+</main>
+<footer><div class="wrap"><div><strong>✦ Achados & Oportunidades</strong><p>Uma venda de garagem cheia de possibilidades.</p></div><p>Consulte disponibilidade e combine os detalhes diretamente com o vendedor.</p></div></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+  'use strict';
+  // Cole aqui a URL PUBLICA de implantação do Apps Script, terminada em /exec.
+  const API_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzLdi7iogDVRXOYEO4s6teP3PX7A9Ih0CeUSWuhHxcNk-8s07v5xW0-oTz9JVmnhdek/exec';
+  let jsonpSeq = 0;
+  function chamarApi(action, id) {
+    return new Promise((resolve, reject) => {
+      if (API_APPS_SCRIPT.includes('COLE_AQUI')) { reject(new Error('Configure API_APPS_SCRIPT no arquivo index.html.')); return; }
+      const cb = '__vgcb_' + Date.now() + '_' + (++jsonpSeq);
+      const script = document.createElement('script');
+      const timeout = setTimeout(() => finish(new Error('Tempo limite ao consultar o catálogo.')), 30000);
+      let finished = false;
+      function finish(err, data) {
+        if (finished) return; finished = true; clearTimeout(timeout); delete window[cb]; script.remove();
+        if (err) reject(err); else resolve(data);
+      }
+      window[cb] = data => { if (data && data.erro) finish(new Error(data.erro)); else finish(null, data); };
+      script.onerror = () => finish(new Error('Não foi possível acessar o Apps Script. Verifique se a implantação é pública e se a URL /exec está correta.'));
+      const url = new URL(API_APPS_SCRIPT);
+      url.searchParams.set('action', action);
+      url.searchParams.set('callback', cb);
+      if (id) url.searchParams.set('id', id);
+      script.src = url.toString();
+      document.head.appendChild(script);
+    });
+  }
+  const $ = (sel) => document.querySelector(sel);
+  const limit = 12;
+  const state = { products:[], category:'Todas', query:'', sort:'recentes', sold:false, favoritesOnly:false, page:1, whatsapp:'' };
+  const photoCache = new Map();
+  const pending = new Set();
+  let localUrls = [];
+  let toastTimeout;
+  let favorites = new Set();
+  try { favorites = new Set(JSON.parse(localStorage.getItem('venda_garagem_favs') || '[]')); } catch (e) { /* Navegador com armazenamento bloqueado */ }
+  const money = (n) => n === null || !Number.isFinite(Number(n)) ? 'Preço sob consulta' : new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n);
+  const plain = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const html = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const categoryEmoji = (s) => /pesca|isca/i.test(s) ? '🎣' : /eletr|tecno/i.test(s) ? '📱' : /ferrament/i.test(s) ? '🧰' : /livr/i.test(s) ? '📚' : /roup|calçado/i.test(s) ? '👕' : /casa|decor|móve/i.test(s) ? '🪑' : '🎁';
+
+  function showToast(message) { const el = $('#toast'); el.textContent = message; el.classList.add('show'); clearTimeout(toastTimeout); toastTimeout = setTimeout(() => el.classList.remove('show'), 4000); }
+  function saveFavorites() { try { localStorage.setItem('venda_garagem_favs', JSON.stringify([...favorites])); } catch(e) {} }
+  function updateFavoriteCounter() { $('#favCount').textContent = favorites.size; $('#favoritesTop').setAttribute('aria-pressed', String(state.favoritesOnly)); }
+  function setProducts(products, whatsapp='') {
+    state.products = Array.isArray(products) ? products : [];
+    state.whatsapp = String(whatsapp||'').replace(/\D/g,'');
+    state.category = 'Todas'; state.query = ''; state.sort = 'recentes'; state.sold = false; state.favoritesOnly = false; state.page = 1;
+    $('#searchInput').value=''; $('#sortInput').value='recentes'; $('#soldInput').checked=false;
+    $('#loading').style.display='none';
+    updateFavoriteCounter(); render();
+  }
+  function getCategories() { return ['Todas', ...new Set(state.products.map(x => x.categoria).filter(Boolean))].sort((a,b) => a==='Todas'?-1:b==='Todas'?1:a.localeCompare(b,'pt-BR')); }
+  function renderCategories() {
+    $('#categories').innerHTML = getCategories().map(c => `<button type="button" class="chip" data-category="${html(c)}" aria-pressed="${state.category === c}">${html(c)}</button>`).join('');
+  }
+  function filtered() {
+    let list = state.products.filter(p => (state.sold || !p.vendido) && (state.category==='Todas' || p.categoria===state.category) && (!state.favoritesOnly || favorites.has(p.id)) && (!state.query || plain(p.nome+' '+p.categoria).includes(plain(state.query))));
+    const price = (p) => p.preco === null ? Infinity : p.preco;
+    if (state.sort === 'menor') list.sort((a,b) => price(a)-price(b));
+    if (state.sort === 'maior') list.sort((a,b) => (b.preco ?? -1)-(a.preco ?? -1));
+    if (state.sort === 'az') list.sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'));
+    if (state.sort === 'recentes') list.sort((a,b) => (b.atualizado||0)-(a.atualizado||0));
+    return list;
+  }
+  function consultationText(p) { return `Olá! Vi no catálogo da venda de garagem o item "${p.nome}" (${money(p.preco)}). Ainda está disponível?`; }
+  function productHtml(p) {
+    const fav = favorites.has(p.id);
+    const cache = photoCache.get(p.id);
+    const photo = cache && cache.src ? `<img src="${cache.src}" alt="${html(p.nome)}" loading="lazy">` : `<div class="placeholder" aria-label="Foto aguardando carregamento">${categoryEmoji(p.categoria)}</div>`;
+    const action = p.vendido ? '<button class="buy" type="button" disabled>Indisponível</button>' : state.whatsapp ? `<a class="buy" href="https://wa.me/${state.whatsapp}?text=${encodeURIComponent(consultationText(p))}" target="_blank" rel="noopener noreferrer">Consultar no WhatsApp ↗</a>` : `<button class="buy ask" type="button" data-id="${html(p.id)}">Copiar mensagem de interesse ↗</button>`;
+    return `<article class="product"><div class="photo">${photo}<span class="tag">${html(p.categoria)}</span><button class="fav ${fav?'active':''}" data-id="${html(p.id)}" type="button" aria-label="${fav?'Remover dos':'Adicionar aos'} favoritos" aria-pressed="${fav}">${fav?'♥':'♡'}</button>${p.vendido?'<div class="sold">Vendido</div>':''}</div><div class="details"><div class="category">Oportunidade</div><h3 class="name">${html(p.nome)}</h3><div class="price ${p.preco === null?'unknown':''}">${money(p.preco)}</div>${action}</div></article>`;
+  }
+  function render() {
+    renderCategories();
+    const list = filtered();
+    const available = state.products.filter(p => !p.vendido).length;
+    $('#totalCount').textContent = available + (available===1?' produto disponível':' produtos disponíveis');
+    const maxPage = Math.max(1,Math.ceil(list.length / limit));
+    state.page = Math.min(state.page, maxPage);
+    const current = list.slice((state.page-1)*limit,state.page*limit);
+    $('#productGrid').innerHTML = current.map(productHtml).join('');
+    $('#emptyState').style.display = list.length ? 'none' : 'block';
+    $('#pages').style.display = maxPage > 1 ? 'flex' : 'none';
+    $('#pagesText').textContent = `Página ${state.page} de ${maxPage}`;
+    $('#prevPage').disabled = state.page===1;
+    $('#nextPage').disabled = state.page===maxPage;
+    updateFavoriteCounter();
+    requestPhotos(current);
+  }
+  function requestPhotos(items) {
+    // Limita requisições simultâneas: Apps Script envia cada foto em base64.
+    const ids = items.filter(p => !p.grande && !photoCache.has(p.id) && !pending.has(p.id) && !p.id.startsWith('local-') && !p.id.startsWith('exemplo-')).map(p => p.id);
+    ids.forEach(id => { pending.add(id); photoQueue.push(id); });
+    pumpPhotos();
+  }
+  const photoQueue = [];
+  let activePhotos = 0;
+  function pumpPhotos() {
+    while (activePhotos < 2 && photoQueue.length) {
+      const id = photoQueue.shift(); activePhotos++;
+      chamarApi('foto', id).then(f => {
+        if (f && f.id === id) photoCache.set(id, f);
+        updateImagesInPlace();
+      }).catch(err => { photoCache.set(id, {id, erro: String(err.message || err)}); })
+        .finally(() => { pending.delete(id); activePhotos--; pumpPhotos(); });
+    }
+  }
+  function updateImagesInPlace(){
+    const cards = [...document.querySelectorAll('.product')];
+    const current = filtered().slice((state.page-1)*limit,state.page*limit);
+    cards.forEach((card,i)=>{
+      const p = current[i]; if(!p) return;
+      const data = photoCache.get(p.id); if(!data?.src) return;
+      const area=card.querySelector('.photo'); const placeholder=area.querySelector('.placeholder');
+      if (placeholder) {const img=document.createElement('img'); img.src=data.src; img.alt=p.nome; img.loading='lazy'; placeholder.replaceWith(img);}
+    });
+  }
+  function showPreview(){
+    $('#previewBanner').style.display='flex';
+    const examples = [
+      {nome:'Isca meia-água 12 cm',preco:3,categoria:'Pesca e acessórios'},
+      {nome:'Luminária de mesa',preco:35,categoria:'Casa e decoração'},
+      {nome:'Conjunto de ferramentas',preco:45,categoria:'Ferramentas'},
+      {nome:'Fone de ouvido',preco:20,categoria:'Eletrônicos'},
+      {nome:'Livro em bom estado',preco:10,categoria:'Livros'},
+      {nome:'Peça decorativa',preco:25,categoria:'Diversos'}
+    ].map((p,i)=>({...p,id:'exemplo-'+i,vendido:false,atualizado:Date.now()-i*1000}));
+    setProducts(examples); showToast('Prévia com itens ilustrativos. Selecione uma pasta para ver suas fotos.');
+  }
+  function parseName(filename){
+    let nome=filename.replace(/\.(jpg|jpeg|png|webp)$/i,'').trim();
+    const vendido=/^VENDIDO\s*[-–:]\s*/i.test(nome)||/\s*[-–:]\s*VENDIDO$/i.test(nome);
+    nome=nome.replace(/^VENDIDO\s*[-–:]\s*/i,'').replace(/\s*[-–:]\s*VENDIDO$/i,'').trim();
+    const m=nome.match(/^(.*?)(?:\s*[-–]\s*|\s+)(?:R\$|Reais)\s*([0-9][0-9.,]*)$/i);
+    if(!m) return {nome,preco:null,vendido};
+    const preco=Number(m[2].replace(/\./g,'').replace(',','.'));
+    return {nome:m[1].trim(),preco:Number.isFinite(preco)?preco:null,vendido};
+  }
+  $('#selectFolder').addEventListener('click',()=>$('#folderInput').click());
+  $('#folderInput').addEventListener('change',(e)=>{
+    localUrls.forEach(URL.revokeObjectURL); localUrls=[]; photoCache.clear();
+    const files=[...e.target.files].filter(f=>/^image\/(jpeg|png|webp)$/.test(f.type));
+    const items=files.map((f,i)=>{
+      const rel=(f.webkitRelativePath||f.name).split('/');
+      const category=rel.length>=3 ? rel[1] : 'Diversos';
+      const id='local-'+i; const src=URL.createObjectURL(f); localUrls.push(src); photoCache.set(id,{src});
+      return {...parseName(f.name),categoria:category,id,grande:false,atualizado:f.lastModified};
+    });
+    setProducts(items);
+    showToast(`${items.length} foto(s) carregada(s) no modo de prévia local.`);
+  });
+  $('#searchInput').addEventListener('input',e=>{state.query=e.target.value;state.page=1;render();});
+  $('#sortInput').addEventListener('change',e=>{state.sort=e.target.value;state.page=1;render();});
+  $('#soldInput').addEventListener('change',e=>{state.sold=e.target.checked;state.page=1;render();});
+  $('#categories').addEventListener('click',e=>{const c=e.target.closest('[data-category]');if(c){state.category=c.dataset.category;state.page=1;render();}});
+  $('#favoritesTop').addEventListener('click',()=>{state.favoritesOnly=!state.favoritesOnly;state.page=1;render();document.querySelector('#produtos').scrollIntoView({behavior:'smooth'});});
+  $('#clearFilters').addEventListener('click',()=>{state.category='Todas';state.query='';state.sort='recentes';state.sold=false;state.favoritesOnly=false;state.page=1;$('#searchInput').value='';$('#sortInput').value='recentes';$('#soldInput').checked=false;render();});
+  $('#prevPage').addEventListener('click',()=>{state.page--;render();document.querySelector('#produtos').scrollIntoView({behavior:'smooth'});});
+  $('#nextPage').addEventListener('click',()=>{state.page++;render();document.querySelector('#produtos').scrollIntoView({behavior:'smooth'});});
+  $('#productGrid').addEventListener('click',async e=>{
+    const fav=e.target.closest('.fav');
+    if (fav) {const id=fav.dataset.id;favorites.has(id)?favorites.delete(id):favorites.add(id);saveFavorites();render();return;}
+    const ask=e.target.closest('.ask');
+    if (ask) {const p=state.products.find(p=>p.id===ask.dataset.id); if(!p)return;const message=consultationText(p);try{await navigator.clipboard.writeText(message);showToast('Mensagem copiada! Envie-a ao vendedor pelo WhatsApp.');}catch(err){window.prompt('Copie esta mensagem e envie ao vendedor:',message);}}
+  });
+  if (API_APPS_SCRIPT.includes('COLE_AQUI')) {
+    $('#loading').innerHTML='<span class="symbol">⚙️</span><h3>Configure o catálogo</h3><p>Informe a URL /exec do Apps Script na constante API_APPS_SCRIPT do index.html. Você pode usar o modo de prévia local enquanto isso.</p>';
+  } else {
+    chamarApi('catalogo').then(result => setProducts(result.produtos, result.whatsapp)).catch(err => {
+      $('#loading').innerHTML='<span class="symbol">⚠️</span><h3>Não foi possível carregar o catálogo</h3><p>'+html(String(err.message||err))+'</p>';
+    });
+  }
+
+</script>
+</body>
+</html>
