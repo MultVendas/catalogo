@@ -33,7 +33,12 @@
     .hero p { color:#d5dfe3; line-height:1.7; font-size:16px; max-width:570px; margin:0 0 25px; }
     .hero-btn { display:inline-flex; padding:15px 23px; border-radius:12px; background:var(--accent); color:white; font-weight:900; gap:9px; align-items:center; }
     .hero-tag { border:1px solid #ffffff35; background:#ffffff12; padding:27px 22px; border-radius:23px; transform:rotate(5deg); text-align:center; box-shadow:0 20px 70px #0003; }
-    .hero-tag .symbol { font-size:46px; display:block; }
+    .hero-tag .symbol { display:flex; justify-content:center; margin-bottom:10px; }
+    .hero-tag .symbol svg { width:70px; height:70px; }
+    .hero-tag { display:block; color:white; cursor:pointer; transition:transform .2s ease, background .2s ease; }
+    .hero-tag:hover, .hero-tag:focus-visible { transform:rotate(0deg) translateY(-3px); background:#ffffff22; outline:2px solid #25d366; outline-offset:4px; }
+    .hero-tag .whats-cta { display:inline-block; background:#25d366; color:#0d301e; padding:11px 17px; border-radius:10px; font-size:14px; font-weight:900; margin-top:16px; }
+    .hero-tag .whats-number { margin-top:9px; font-size:14px; font-weight:800; color:white; }
     .hero-tag strong { display:block; font-size:27px; letter-spacing:-.05em; margin-top:8px; }
     .hero-tag span { display:block; color:#d2dbdd; font-size:12px; line-height:1.6; }
     .benefits { background:#fff; border-bottom:1px solid var(--line); }
@@ -94,7 +99,7 @@
     .toast { position:fixed; bottom:20px; left:50%; transform:translate(-50%,140px); padding:14px 21px; border-radius:12px; background:#172630; color:#fff; z-index:50; max-width:min(440px,90vw); box-shadow:0 14px 45px #0003; transition:transform .3s ease; font-size:13px; font-weight:700; text-align:center; }
     .toast.show { transform:translate(-50%,0); }
     @media(max-width:950px) { .grid{grid-template-columns:repeat(3,minmax(0,1fr));} .hero{padding:53px 0;} }
-    @media(max-width:690px) { .wrap{width:min(100% - 28px,1180px);} .hero-in{grid-template-columns:1fr;} .hero-tag{display:none;} .hero{padding:46px 0;} h1{font-size:clamp(39px,10vw,58px);} .benefits .wrap{justify-content:space-between;gap:11px;} .benefits span{font-size:11px;} .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;} .details{padding:12px;} .price{font-size:20px;} .name{font-size:13px;min-height:36px;} .category{font-size:9px;} .order{flex:1 1 180px;} .header{min-height:67px;} .nav-link{padding:10px 11px;} .nav-actions .primary{display:none;} main{padding-top:32px;} }
+    @media(max-width:690px) { .wrap{width:min(100% - 28px,1180px);} .hero-in{grid-template-columns:1fr;} .hero-tag{display:block;transform:none;max-width:410px;width:100%;margin:0 auto;padding:22px 16px;} .hero{padding:46px 0;} h1{font-size:clamp(39px,10vw,58px);} .benefits .wrap{justify-content:space-between;gap:11px;} .benefits span{font-size:11px;} .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;} .details{padding:12px;} .price{font-size:20px;} .name{font-size:13px;min-height:36px;} .category{font-size:9px;} .order{flex:1 1 180px;} .header{min-height:67px;} .nav-link{padding:10px 11px;} .nav-actions .primary{display:none;} main{padding-top:32px;} }
     @media(max-width:390px) { .logo{font-size:16px;} .logo-mark{width:35px;height:35px;font-size:20px;} .nav-link{font-size:12px;} .benefits .wrap{gap:7px;} .benefits span{font-size:10px;} .grid{gap:9px;} .photo{aspect-ratio:1/1;} .name{font-size:12px;} .price{font-size:18px;} .details{padding:10px;} .buy{font-size:12px;} }
   </style>
 </head>
@@ -116,7 +121,13 @@
       <p>Peças únicas, boas descobertas e ofertas para aproveitar. Encontrou algo de que gostou? Fale com a gente antes que acabe!</p>
       <a class="hero-btn" href="#produtos">Explorar catálogo <span aria-hidden="true">↗</span></a>
     </div>
-    <div class="hero-tag"><span class="symbol">🏷️</span><strong>Achados únicos!</strong><span>Confira as novidades<br>e garanta seus favoritos.</span></div>
+    <a class="hero-tag" href="https://wa.me/558499501406" target="_blank" rel="noopener noreferrer" aria-label="Conversar com a MultVendas pelo WhatsApp no número 55 84 9950-1406">
+      <span class="symbol" aria-hidden="true"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path fill="#25D366" d="M32 3C16 3 3 16 3 32c0 5.6 1.6 10.8 4.3 15.2L3.5 61l14.3-3.7A29 29 0 1 0 32 3Z"/><path fill="#fff" d="M32 10C19.9 10 10 19.9 10 32c0 4.2 1.2 8.1 3.3 11.5l-2.2 8.2 8.5-2.2A21.9 21.9 0 0 0 32 54c12.1 0 22-9.9 22-22S44.1 10 32 10Zm0 39.9a17.8 17.8 0 0 1-9.1-2.5l-.7-.4-5.4 1.4 1.4-5.2-.5-.8A17.8 17.8 0 1 1 32 49.9Z"/><path fill="#fff" d="M23.1 20.7c-.6-1.3-1.3-1.4-1.9-1.4h-1.6c-.6 0-1.6.2-2.4 1.1-.8.9-3.1 3-3.1 7.3s3.2 8.4 3.7 9c.5.6 6.3 10.1 15.5 13.7 7.6 3 9.2 2.4 10.9 2.2 1.7-.2 5.4-2.2 6.2-4.4.8-2.2.8-4 .6-4.4-.3-.4-.9-.7-1.9-1.2l-5.6-2.7c-.8-.3-1.4-.5-2 .5-.6.9-2.3 2.7-2.8 3.3-.5.5-1 .6-1.9.2-.9-.5-3.8-1.4-7.2-4.5-2.7-2.4-4.5-5.4-5-6.3-.5-.9-.1-1.4.4-1.9.4-.4.9-1 1.4-1.5.5-.5.6-.9.9-1.5.3-.6.1-1.1-.1-1.6l-2.5-6Z" transform="translate(8 9) scale(.73)"/></svg></span>
+      <strong>Fale com a MultVendas!</strong>
+      <span>Gostou de algum produto?<br>Tire suas dúvidas pelo WhatsApp.</span>
+      <span class="whats-cta">Conversar agora ↗</span>
+      <span class="whats-number">84 9950-1406</span>
+    </a>
   </div>
 </section>
 <div class="benefits"><div class="wrap"><span><b>✓</b> Ofertas especiais</span><span><b>✓</b> Peças selecionadas</span><span><b>✓</b> Negociação direta</span></div></div>
