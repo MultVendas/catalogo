@@ -314,6 +314,7 @@
   // Visualizador de fotografias em tela cheia (desktop e smartphone).
   let lightboxId = null;
   let lightboxReturnFocus = null;
+  let lightboxHistoryActive = false;
   function updateLightboxIfReady() {
     if (!lightboxId || $('#photoLightbox').hidden) return;
     const p = state.products.find(item => item.id === lightboxId);
@@ -345,13 +346,24 @@
     if (!state.products.some(p => p.id === id)) return;
     lightboxReturnFocus = trigger || document.activeElement;
     lightboxId = id;
+    // Cria uma etapa no histórico: o botão Voltar do celular fecha a foto.
+    if (!lightboxHistoryActive) {
+      history.pushState({ ...(history.state || {}), multvendasPhotoViewer: true }, '', location.href);
+      lightboxHistoryActive = true;
+    }
     $('#photoLightbox').hidden = false;
     document.body.classList.add('lightbox-open');
     updateLightboxIfReady();
     $('#lightboxClose').focus();
   }
-  function closeLightbox() {
+  function closeLightbox(fromHistory = false) {
     if ($('#photoLightbox').hidden) return;
+    // Ao clicar no X, consome a etapa criada ao abrir a foto.
+    if (!fromHistory && lightboxHistoryActive) {
+      history.back();
+      return;
+    }
+    lightboxHistoryActive = false;
     $('#photoLightbox').hidden = true;
     document.body.classList.remove('lightbox-open');
     lightboxId = null;
@@ -365,7 +377,12 @@
     lightboxId = items[i + direction].id;
     updateLightboxIfReady();
   }
-  $('#lightboxClose').addEventListener('click', closeLightbox);
+  // Voltar do Android/iPhone: fecha a ampliação sem abandonar o catálogo.
+  window.addEventListener('popstate', () => {
+    if (!$('#photoLightbox').hidden) closeLightbox(true);
+    else lightboxHistoryActive = false;
+  });
+  $('#lightboxClose').addEventListener('click', () => closeLightbox());
   $('#lightboxPrev').addEventListener('click', () => moveLightbox(-1));
   $('#lightboxNext').addEventListener('click', () => moveLightbox(1));
   $('#lightboxBackdrop').addEventListener('click', e => {
