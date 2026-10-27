@@ -68,6 +68,33 @@
     .product { background:white; border:1px solid var(--line); border-radius:17px; overflow:hidden; box-shadow:var(--shadow); min-width:0; display:flex; flex-direction:column; }
     .photo { position:relative; aspect-ratio:4/3; background:linear-gradient(135deg,#ece8df,#f8f4ea); overflow:hidden; }
     .photo img { display:block; width:100%; height:100%; object-fit:cover; }
+    .photo-open { position:absolute; inset:0; z-index:1; width:100%; height:100%; border:0; background:transparent; cursor:zoom-in; }
+    .photo-open:focus-visible { outline:3px solid var(--accent); outline-offset:-4px; }
+    .photo-zoom-hint { position:absolute; right:9px; bottom:9px; z-index:2; pointer-events:none; border-radius:8px; background:rgba(23,38,48,.86); color:#fff; padding:6px 9px; font-size:11px; font-weight:800; }
+    .photo .tag { z-index:2; pointer-events:none; }
+    .photo .fav { z-index:4; }
+    .photo .sold { z-index:2; pointer-events:none; }
+    .lightbox[hidden] { display:none !important; }
+    .lightbox { position:fixed; inset:0; z-index:1000; display:flex; flex-direction:column; background:rgba(7,14,20,.96); color:#fff; padding:env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
+    .lightbox-top { display:flex; justify-content:space-between; align-items:center; gap:15px; padding:12px 18px; min-height:60px; }
+    .lightbox-title { font-size:14px; font-weight:800; line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .lightbox-close { flex-shrink:0; border:1px solid #ffffff60; border-radius:50%; background:#ffffff1c; color:#fff; width:43px; height:43px; font-size:28px; line-height:1; }
+    .lightbox-main { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; position:relative; padding:8px 55px; }
+    .lightbox-image { display:block; max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:5px; }
+    .lightbox-message { position:absolute; color:#fff; text-align:center; padding:20px; font-weight:700; }
+    .lightbox-arrow { position:absolute; top:50%; transform:translateY(-50%); border:1px solid #ffffff66; border-radius:50%; background:#1b303acc; color:#fff; font-size:30px; width:45px; height:45px; display:grid; place-items:center; z-index:1; }
+    .lightbox-prev { left:8px; }
+    .lightbox-next { right:8px; }
+    .lightbox-bottom { padding:12px 18px 18px; text-align:center; }
+    .lightbox-price { color:#ffab7e; font-size:20px; font-weight:900; }
+    .lightbox-counter { margin-top:4px; color:#d1d9dc; font-size:12px; }
+    body.lightbox-open { overflow:hidden; }
+    @media(max-width:690px) {
+      .lightbox-main { padding:8px 42px; }
+      .lightbox-arrow { width:34px; height:42px; border-radius:10px; font-size:25px; }
+      .lightbox-prev { left:3px; } .lightbox-next { right:3px; }
+      .lightbox-zoom-hint { font-size:10px; padding:5px 7px; }
+    }
     .placeholder { height:100%; display:grid; place-items:center; font-size:58px; color:#aaa; }
     .tag { position:absolute; bottom:10px; left:10px; display:inline-block; background:var(--ink); color:white; border-radius:7px; padding:6px 8px; font-size:10px; font-weight:900; letter-spacing:.04em; text-transform:uppercase; }
     .sold { position:absolute; inset:0; display:grid; place-items:center; background:#11212abe; color:white; text-transform:uppercase; font-weight:900; font-size:21px; letter-spacing:.08em; }
@@ -151,6 +178,22 @@
 </main>
 <footer><div class="wrap"><div><strong>✦ Achados & Oportunidades</strong><p>Uma venda de garagem cheia de possibilidades.</p></div><p>Consulte disponibilidade e combine os detalhes diretamente com o vendedor.</p></div></footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="lightbox" id="photoLightbox" role="dialog" aria-modal="true" aria-label="Fotografia ampliada do produto" hidden>
+  <div class="lightbox-top">
+    <span class="lightbox-title" id="lightboxTitle"></span>
+    <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Fechar fotografia ampliada">×</button>
+  </div>
+  <div class="lightbox-main" id="lightboxBackdrop">
+    <button class="lightbox-arrow lightbox-prev" id="lightboxPrev" type="button" aria-label="Fotografia anterior">‹</button>
+    <img class="lightbox-image" id="lightboxImage" alt="" hidden>
+    <div class="lightbox-message" id="lightboxMessage">Carregando fotografia...</div>
+    <button class="lightbox-arrow lightbox-next" id="lightboxNext" type="button" aria-label="Próxima fotografia">›</button>
+  </div>
+  <div class="lightbox-bottom">
+    <div class="lightbox-price" id="lightboxPrice"></div>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+  </div>
+</div>
 <script>
   'use strict';
   // Cole aqui a URL PUBLICA de implantação do Apps Script, terminada em /exec.
@@ -221,7 +264,7 @@
     const cache = photoCache.get(p.id);
     const photo = cache && cache.src ? `<img src="${cache.src}" alt="${html(p.nome)}" loading="lazy">` : `<div class="placeholder" aria-label="Foto aguardando carregamento">${categoryEmoji(p.categoria)}</div>`;
     const action = p.vendido ? '<button class="buy" type="button" disabled>Indisponível</button>' : state.whatsapp ? `<a class="buy" href="https://wa.me/${state.whatsapp}?text=${encodeURIComponent(consultationText(p))}" target="_blank" rel="noopener noreferrer">Consultar no WhatsApp ↗</a>` : `<button class="buy ask" type="button" data-id="${html(p.id)}">Copiar mensagem de interesse ↗</button>`;
-    return `<article class="product"><div class="photo">${photo}<span class="tag">${html(p.categoria)}</span><button class="fav ${fav?'active':''}" data-id="${html(p.id)}" type="button" aria-label="${fav?'Remover dos':'Adicionar aos'} favoritos" aria-pressed="${fav}">${fav?'♥':'♡'}</button>${p.vendido?'<div class="sold">Vendido</div>':''}</div><div class="details"><div class="category">Oportunidade</div><h3 class="name">${html(p.nome)}</h3><div class="price ${p.preco === null?'unknown':''}">${money(p.preco)}</div>${action}</div></article>`;
+    return `<article class="product"><div class="photo">${photo}<button type="button" class="photo-open" data-photo-id="${html(p.id)}" aria-label="Ampliar foto de ${html(p.nome)}"></button><span class="photo-zoom-hint">⤢ Ampliar</span><span class="tag">${html(p.categoria)}</span><button class="fav ${fav?'active':''}" data-id="${html(p.id)}" type="button" aria-label="${fav?'Remover dos':'Adicionar aos'} favoritos" aria-pressed="${fav}">${fav?'♥':'♡'}</button>${p.vendido?'<div class="sold">Vendido</div>':''}</div><div class="details"><div class="category">Oportunidade</div><h3 class="name">${html(p.nome)}</h3><div class="price ${p.preco === null?'unknown':''}">${money(p.preco)}</div>${action}</div></article>`;
   }
   function render() {
     renderCategories();
@@ -253,7 +296,7 @@
       const id = photoQueue.shift(); activePhotos++;
       chamarApi('foto', id).then(f => {
         if (f && f.id === id) photoCache.set(id, f);
-        updateImagesInPlace();
+        updateImagesInPlace(); updateLightboxIfReady();
       }).catch(err => { photoCache.set(id, {id, erro: String(err.message || err)}); })
         .finally(() => { pending.delete(id); activePhotos--; pumpPhotos(); });
     }
@@ -268,6 +311,81 @@
       if (placeholder) {const img=document.createElement('img'); img.src=data.src; img.alt=p.nome; img.loading='lazy'; placeholder.replaceWith(img);}
     });
   }
+  // Visualizador de fotografias em tela cheia (desktop e smartphone).
+  let lightboxId = null;
+  let lightboxReturnFocus = null;
+  function updateLightboxIfReady() {
+    if (!lightboxId || $('#photoLightbox').hidden) return;
+    const p = state.products.find(item => item.id === lightboxId);
+    if (!p) { closeLightbox(); return; }
+    const images = filtered();
+    const position = images.findIndex(item => item.id === lightboxId);
+    $('#lightboxTitle').textContent = p.nome;
+    $('#lightboxPrice').textContent = money(p.preco);
+    $('#lightboxCounter').textContent = position >= 0 ? `Produto ${position + 1} de ${images.length} • Toque fora da imagem ou use × para fechar` : 'Toque em × para fechar';
+    $('#lightboxPrev').disabled = position <= 0;
+    $('#lightboxNext').disabled = position < 0 || position >= images.length - 1;
+    const data = photoCache.get(p.id);
+    const img = $('#lightboxImage');
+    const msg = $('#lightboxMessage');
+    if (data?.src) {
+      if (img.src !== data.src) img.src = data.src;
+      img.alt = `Fotografia ampliada: ${p.nome}`;
+      img.hidden = false;
+      msg.hidden = true;
+    } else {
+      img.hidden = true;
+      img.removeAttribute('src');
+      msg.hidden = false;
+      msg.textContent = data?.erro ? 'Não foi possível carregar esta fotografia.' : 'Carregando fotografia...';
+      if (!data && !pending.has(p.id)) requestPhotos([p]);
+    }
+  }
+  function openLightbox(id, trigger) {
+    if (!state.products.some(p => p.id === id)) return;
+    lightboxReturnFocus = trigger || document.activeElement;
+    lightboxId = id;
+    $('#photoLightbox').hidden = false;
+    document.body.classList.add('lightbox-open');
+    updateLightboxIfReady();
+    $('#lightboxClose').focus();
+  }
+  function closeLightbox() {
+    if ($('#photoLightbox').hidden) return;
+    $('#photoLightbox').hidden = true;
+    document.body.classList.remove('lightbox-open');
+    lightboxId = null;
+    if (lightboxReturnFocus?.isConnected) lightboxReturnFocus.focus();
+    lightboxReturnFocus = null;
+  }
+  function moveLightbox(direction) {
+    const items = filtered();
+    const i = items.findIndex(p => p.id === lightboxId);
+    if (i < 0 || !items[i + direction]) return;
+    lightboxId = items[i + direction].id;
+    updateLightboxIfReady();
+  }
+  $('#lightboxClose').addEventListener('click', closeLightbox);
+  $('#lightboxPrev').addEventListener('click', () => moveLightbox(-1));
+  $('#lightboxNext').addEventListener('click', () => moveLightbox(1));
+  $('#lightboxBackdrop').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeLightbox();
+  });
+  $('#photoLightbox').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeLightbox();
+  });
+  document.addEventListener('keydown', e => {
+    if ($('#photoLightbox').hidden) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); moveLightbox(-1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); moveLightbox(1); }
+    if (e.key === 'Tab') {
+      const buttons = [...$('#photoLightbox').querySelectorAll('button:not(:disabled)')];
+      const i = buttons.indexOf(document.activeElement);
+      if (e.shiftKey && i === 0) { e.preventDefault(); buttons[buttons.length - 1].focus(); }
+      else if (!e.shiftKey && i === buttons.length - 1) { e.preventDefault(); buttons[0].focus(); }
+    }
+  });
   function showPreview(){
     $('#previewBanner').style.display='flex';
     const examples = [
@@ -311,6 +429,8 @@
   $('#prevPage').addEventListener('click',()=>{state.page--;render();document.querySelector('#produtos').scrollIntoView({behavior:'smooth'});});
   $('#nextPage').addEventListener('click',()=>{state.page++;render();document.querySelector('#produtos').scrollIntoView({behavior:'smooth'});});
   $('#productGrid').addEventListener('click',async e=>{
+    const open=e.target.closest('[data-photo-id]');
+    if (open) { openLightbox(open.dataset.photoId, open); return; }
     const fav=e.target.closest('.fav');
     if (fav) {const id=fav.dataset.id;favorites.has(id)?favorites.delete(id):favorites.add(id);saveFavorites();render();return;}
     const ask=e.target.closest('.ask');
