@@ -262,9 +262,9 @@
   function productHtml(p) {
     const fav = favorites.has(p.id);
     const cache = photoCache.get(p.id);
-    const photo = cache && cache.src ? `<img src="${cache.src}" alt="${html(p.nome)}" loading="lazy">` : `<div class="placeholder" aria-label="Foto aguardando carregamento">${categoryEmoji(p.categoria)}</div>`;
+    const photo = cache && cache.src ? `<img src="${cache.src}" alt="${html(p.nome)}" loading="lazy" decoding="async">` : `<div class="placeholder" aria-label="Foto aguardando carregamento">${categoryEmoji(p.categoria)}</div>`;
     const action = p.vendido ? '<button class="buy" type="button" disabled>Indisponível</button>' : state.whatsapp ? `<a class="buy" href="https://wa.me/${state.whatsapp}?text=${encodeURIComponent(consultationText(p))}" target="_blank" rel="noopener noreferrer">Consultar no WhatsApp ↗</a>` : `<button class="buy ask" type="button" data-id="${html(p.id)}">Copiar mensagem de interesse ↗</button>`;
-    return `<article class="product"><div class="photo">${photo}<button type="button" class="photo-open" data-photo-id="${html(p.id)}" aria-label="Ampliar foto de ${html(p.nome)}"></button><span class="photo-zoom-hint">⤢ Ampliar</span><span class="tag">${html(p.categoria)}</span><button class="fav ${fav?'active':''}" data-id="${html(p.id)}" type="button" aria-label="${fav?'Remover dos':'Adicionar aos'} favoritos" aria-pressed="${fav}">${fav?'♥':'♡'}</button>${p.vendido?'<div class="sold">Vendido</div>':''}</div><div class="details"><div class="category">Oportunidade</div><h3 class="name">${html(p.nome)}</h3><div class="price ${p.preco === null?'unknown':''}">${money(p.preco)}</div>${action}</div></article>`;
+    return `<article class="product"><div class="photo" data-photo-id="${html(p.id)}">${photo}<button type="button" class="photo-open" data-photo-id="${html(p.id)}" aria-label="Ampliar foto de ${html(p.nome)}"></button><span class="photo-zoom-hint">⤢ Ampliar</span><span class="tag">${html(p.categoria)}</span><button class="fav ${fav?'active':''}" data-id="${html(p.id)}" type="button" aria-label="${fav?'Remover dos':'Adicionar aos'} favoritos" aria-pressed="${fav}">${fav?'♥':'♡'}</button>${p.vendido?'<div class="sold">Vendido</div>':''}</div><div class="details"><div class="category">Oportunidade</div><h3 class="name">${html(p.nome)}</h3><div class="price ${p.preco === null?'unknown':''}">${money(p.preco)}</div>${action}</div></article>`;
   }
   function render() {
     renderCategories();
@@ -281,24 +281,117 @@
     $('#prevPage').disabled = state.page===1;
     $('#nextPage').disabled = state.page===maxPage;
     updateFavoriteCounter();
-    requestPhotos(current);
+    prioritizePhotoQueue(new Set(current.map(p => p.id)));
+    observePhotos(current);
   }
-  function requestPhotos(items) {
-    // Limita requisições simultâneas: Apps Script envia cada foto em base64.
-    const ids = items.filter(p => !p.grande && !photoCache.has(p.id) && !pending.has(p.id) && !p.id.startsWith('local-') && !p.id.startsWith('exemplo-')).map(p => p.id);
-    ids.forEach(id => { pending.add(id); photoQueue.push(id); });
-    pumpPhotos();
-  }
+  // Carregamento progressivo: requisita somente imagens visíveis ou próximas da tela.
   const photoQueue = [];
   let activePhotos = 0;
+  let photoObserver = null;
+  const CACHE_NAME = 'multvendas-fotos-v1';
+  const MAX_CACHED_PHOTOS = 60;
+
+  function prioritizePhotoQueue(currentIds) {
+    // Descarta solicitações ainda não iniciadas de páginas/categorias anteriores.
+    for (let i = photoQueue.length - 1; i >= 0; i--) {
+      if (!currentIds.has(photoQueue[i])) {
+        pending.delete(photoQueue[i]);
+        photoQueue.splice(i, 1);
+      }
+    }
+  }
+  function observePhotos(items) {
+    if (photoObserver) photoObserver.disconnect();
+    const targets = [...document.querySelectorAll('.photo[data-photo-id]')];
+    if (!('IntersectionObserver' in window)) {
+      // Navegadores antigos: carrega a página normalmente.
+      requestPhotos(items);
+      return;
+    }
+    const productsById = new Map(items.map(p => [p.id, p]));
+    photoObserver = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        photoObserver.unobserve(entry.target);
+        const product = productsById.get(entry.target.dataset.photoId);
+        if (product) requestPhotos([product]);
+      }
+    }, {rootMargin: '350px 0px', threshold: 0.01});
+    targets.forEach(target => {
+      if (!photoCache.get(target.dataset.photoId)?.src) photoObserver.observe(target);
+    });
+  }
+  function requestPhotos(items, priority = false) {
+    const ids = items.filter(p => !p.grande && !photoCache.has(p.id) && !p.id.startsWith('local-') && !p.id.startsWith('exemplo-')).map(p => p.id);
+    for (const id of ids) {
+      if (pending.has(id)) {
+        if (priority) {
+          const index = photoQueue.indexOf(id);
+          if (index >= 0) { photoQueue.splice(index, 1); photoQueue.unshift(id); }
+        }
+        continue;
+      }
+      pending.add(id);
+      if (priority) photoQueue.unshift(id);
+      else photoQueue.push(id);
+    }
+    pumpPhotos();
+  }
+  function persistentPhotoKey(p) {
+    // A data de atualização invalida automaticamente uma foto substituída no Drive.
+    const url = new URL(window.location.pathname, window.location.origin);
+    url.searchParams.set('_mv_foto', p.id);
+    url.searchParams.set('versao', String(p.atualizado || 0));
+    return url.toString();
+  }
+  async function readPersistentPhoto(p) {
+    if (!('caches' in window)) return null;
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      const response = await cache.match(persistentPhotoKey(p));
+      if (!response) return null;
+      const src = await response.text();
+      return /^data:image\/(jpeg|png|webp);base64,/i.test(src) ? {id: p.id, src} : null;
+    } catch (e) { return null; } // Armazenamento privado ou bloqueado: segue normalmente.
+  }
+  async function savePersistentPhoto(p, data) {
+    if (!('caches' in window) || !data?.src) return;
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(persistentPhotoKey(p), new Response(data.src, {
+        headers: {'Content-Type': 'text/plain; charset=utf-8'}
+      }));
+      // Limita o espaço ocupado no celular; as mais antigas saem primeiro.
+      const keys = await cache.keys();
+      if (keys.length > MAX_CACHED_PHOTOS) {
+        await Promise.all(keys.slice(0, keys.length - MAX_CACHED_PHOTOS).map(key => cache.delete(key)));
+      }
+    } catch (e) { /* Sem cache persistente, o catálogo continua funcionando. */ }
+  }
   function pumpPhotos() {
-    while (activePhotos < 2 && photoQueue.length) {
-      const id = photoQueue.shift(); activePhotos++;
-      chamarApi('foto', id).then(f => {
-        if (f && f.id === id) photoCache.set(id, f);
-        updateImagesInPlace(); updateLightboxIfReady();
-      }).catch(err => { photoCache.set(id, {id, erro: String(err.message || err)}); })
-        .finally(() => { pending.delete(id); activePhotos--; pumpPhotos(); });
+    // Três chamadas em paralelo: evita sobrecarregar o Apps Script.
+    while (activePhotos < 3 && photoQueue.length) {
+      const id = photoQueue.shift();
+      const p = state.products.find(item => item.id === id);
+      if (!p) { pending.delete(id); continue; }
+      activePhotos++;
+      (async () => {
+        let result = await readPersistentPhoto(p);
+        if (!result) {
+          result = await chamarApi('foto', id);
+          if (result?.src && result.id === id) void savePersistentPhoto(p, result);
+        }
+        if (result?.id === id) photoCache.set(id, result);
+        updateImagesInPlace();
+        updateLightboxIfReady();
+      })().catch(err => {
+        photoCache.set(id, {id, erro: String(err.message || err)});
+        updateLightboxIfReady();
+      }).finally(() => {
+        pending.delete(id);
+        activePhotos--;
+        pumpPhotos();
+      });
     }
   }
   function updateImagesInPlace(){
@@ -308,7 +401,7 @@
       const p = current[i]; if(!p) return;
       const data = photoCache.get(p.id); if(!data?.src) return;
       const area=card.querySelector('.photo'); const placeholder=area.querySelector('.placeholder');
-      if (placeholder) {const img=document.createElement('img'); img.src=data.src; img.alt=p.nome; img.loading='lazy'; placeholder.replaceWith(img);}
+      if (placeholder) {const img=document.createElement('img'); img.src=data.src; img.alt=p.nome; img.loading='lazy'; img.decoding='async'; placeholder.replaceWith(img);}
     });
   }
   // Visualizador de fotografias em tela cheia (desktop e smartphone).
@@ -339,7 +432,7 @@
       img.removeAttribute('src');
       msg.hidden = false;
       msg.textContent = data?.erro ? 'Não foi possível carregar esta fotografia.' : 'Carregando fotografia...';
-      if (!data && !pending.has(p.id)) requestPhotos([p]);
+      if (!data) requestPhotos([p], true);
     }
   }
   function openLightbox(id, trigger) {
